@@ -1,24 +1,37 @@
-# Logs
-logs
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-lerna-debug.log*
+# Dependencies
+node_modules/
 
-node_modules
-dist
-dist-ssr
-*.local
+# Environment variables (NEVER commit these)
+.env
+.env.local
+.env.production
+.env.development
 
-# Editor directories and files
-.vscode/*
-!.vscode/extensions.json
-.idea
+# Tauri build outputs
+src-tauri/target/
+
+# Vite build output
+dist/
+
+# Convex generated files (auto-regenerated, no need to commit)
+convex/_generated/
+
+# OS files
 .DS_Store
+Thumbs.db
+
+# Editor files
+.vscode/
+.idea/
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
-*.sw?
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# Type checking cache
+*.tsbuildinfo
