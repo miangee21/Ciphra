@@ -1,18 +1,27 @@
 //src/App.tsx
+import { ConvexProvider, ConvexReactClient } from "convex/react";
+import { useEffect } from "react";
+import AppRouter from "@/router/AppRouter";
+import { useThemeStore } from "@/store/themeStore";
 import "./App.css";
-import { Button } from "./components/ui/button";
 
-function App() {
+const convex = new ConvexReactClient(import.meta.env.VITE_CONVEX_URL as string);
+
+export default function App() {
+  const { mode, accent } = useThemeStore();
+
+  useEffect(() => {
+    // Apply dark/light mode class to html element
+    document.documentElement.classList.remove("light", "dark");
+    document.documentElement.classList.add(mode);
+
+    // Apply accent color as data attribute
+    document.documentElement.setAttribute("data-accent", accent);
+  }, [mode, accent]);
+
   return (
-    <div className="flex justify-center items-center min-h-screen">
-      <div className="text-center">
-        <h1 className="text-3xl text-pink-900 font-bold underline">
-          Hello world!
-        </h1>
-        <Button>Get Started</Button>
-      </div>
-    </div>
+    <ConvexProvider client={convex}>
+      <AppRouter />
+    </ConvexProvider>
   );
 }
-
-export default App;
