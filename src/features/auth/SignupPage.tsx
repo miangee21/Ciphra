@@ -1,4 +1,30 @@
-//src/features/auth/LoginPage.tsx
+// src/features/auth/SignupPage.tsx
+import { useState } from "react";
+import UsernameStep from "./components/UsernameStep";
+import MnemonicRevealStep from "./components/MnemonicRevealStep";
+
+type Step = "username" | "mnemonic";
+
 export default function SignupPage() {
-  return <div>Signup</div>;
+  const [step, setStep] = useState<Step>("username");
+  const [username, setUsername] = useState("");
+
+  if (step === "username") {
+    return (
+      <UsernameStep
+        initialUsername={username}
+        onNext={(u) => {
+          setUsername(u);
+          setStep("mnemonic");
+        }}
+      />
+    );
+  }
+
+  return (
+    <MnemonicRevealStep
+      username={username}
+      onBack={() => setStep("username")}
+    />
+  );
 }

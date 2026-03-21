@@ -3,6 +3,7 @@ import { ConvexProvider, ConvexReactClient } from "convex/react";
 import { useEffect } from "react";
 import AppRouter from "@/router/AppRouter";
 import { useThemeStore } from "@/store/themeStore";
+import { Toaster } from "sonner";
 import "./App.css";
 
 const convex = new ConvexReactClient(import.meta.env.VITE_CONVEX_URL as string);
@@ -22,6 +23,7 @@ export default function App() {
   return (
     <ConvexProvider client={convex}>
       <AppRouter />
+      <Toaster richColors position="top-right" theme={mode} />
     </ConvexProvider>
   );
 }
