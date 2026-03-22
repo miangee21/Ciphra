@@ -9,6 +9,7 @@ let _privateKey: string | null = null;
 export const ramStore = {
   setKey: (key: string): void => {
     _privateKey = key;
+    window.dispatchEvent(new Event("ram_key_changed"));
   },
 
   getKey: (): string | null => {
@@ -17,6 +18,7 @@ export const ramStore = {
 
   clearKey: (): void => {
     _privateKey = null;
+    window.dispatchEvent(new Event("ram_key_changed"));
   },
 
   hasKey: (): boolean => {
