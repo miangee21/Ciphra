@@ -1,26 +1,26 @@
-// src/features/home/components/FolderContextMenu.tsx
+// src/features/folder/components/FileContextMenu.tsx
 import { useState } from "react";
 import { useMutation } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { ramStore } from "@/lib/storage/ram";
 import { encryptData } from "@/lib/crypto/aes";
-import type { DecryptedFolder } from "../HomePage";
+import type { DecryptedFile, DecryptedDocument } from "../FolderPage";
 import type { Id } from "../../../../convex/_generated/dataModel";
-import VerifyPinModal from "@/components/common/VerifyPinModal";
 import ConfirmModal from "@/components/common/ConfirmModal";
+import VerifyPinModal from "@/components/common/VerifyPinModal";
 import { toast } from "sonner";
 import {
   Star,
   StarOff,
+  Lock,
+  Unlock,
   Pencil,
   Palette,
   Trash2,
-  Lock,
-  Unlock,
   Check,
 } from "lucide-react";
 
-const FOLDER_COLORS = [
+const DOC_COLORS = [
   "#6366f1",
   "#8b5cf6",
   "#ec4899",
@@ -31,53 +31,86 @@ const FOLDER_COLORS = [
   "#14b8a6",
 ];
 
-interface FolderContextMenuProps {
-  folder: DecryptedFolder;
+interface FileContextMenuProps {
+  item: DecryptedFile | DecryptedDocument;
+  itemType: "file" | "document";
+  folderId: Id<"folders">;
   onClose: () => void;
 }
 
-export default function FolderContextMenu({
-  folder,
+export default function FileContextMenu({
+  item,
+  itemType,
   onClose,
-}: FolderContextMenuProps) {
+}: FileContextMenuProps) {
   const [view, setView] = useState<"menu" | "rename" | "color">("menu");
-  const [newName, setNewName] = useState(folder.name);
+  const [newName, setNewName] = useState(item.name);
   const [loading, setLoading] = useState(false);
-  const [showPinModal, setShowPinModal] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const updateFolder = useMutation(api.folders.updateFolder);
-  const softDelete = useMutation(api.folders.softDeleteFolder);
+  const [showPinModal, setShowPinModal] = useState(false);
 
+  const updateFile = useMutation(api.files.updateFile);
+  const updateDoc = useMutation(api.documents.updateDocument);
+  const softDeleteFile = useMutation(api.files.softDeleteFile);
+  const softDeleteDoc = useMutation(api.documents.softDeleteDocument);
+
+  // ── Handle Star ──
   const handleStar = async () => {
-    await updateFolder({
-      id: folder._id as Id<"folders">,
-      isStarred: !folder.isStarred,
-    });
-    toast.success(folder.isStarred ? "Unstarred" : "Starred successfully");
-    onClose();
+    try {
+      if (itemType === "file") {
+        await updateFile({
+          id: item._id as Id<"files">,
+          isStarred: !item.isStarred,
+        });
+      } else {
+        await updateDoc({
+          id: item._id as Id<"documents">,
+          isStarred: !item.isStarred,
+        });
+      }
+      toast.success(
+        item.isStarred ? "Removed from Starred" : "Added to Starred",
+      );
+      onClose();
+    } catch {
+      toast.error("Failed to update star status");
+    }
   };
 
-  const handleLockToggle = async () => {
-    if (folder.isLocked) {
+  // ── Handle Lock ──
+  const handleLockToggle = () => {
+    if (item.isLocked) {
       setShowPinModal(true);
     } else {
-      await performLockToggle();
+      performLockToggle();
     }
   };
 
   const performLockToggle = async () => {
-    await updateFolder({
-      id: folder._id as Id<"folders">,
-      isLocked: !folder.isLocked,
-    });
-    toast.success(
-      folder.isLocked ? "Folder Unlocked" : "Folder Locked Securely",
-    );
-    onClose();
+    try {
+      if (itemType === "file") {
+        await updateFile({
+          id: item._id as Id<"files">,
+          isLocked: !item.isLocked,
+        });
+      } else {
+        await updateDoc({
+          id: item._id as Id<"documents">,
+          isLocked: !item.isLocked,
+        });
+      }
+      toast.success(
+        item.isLocked ? "Unlocked successfully" : "Locked securely",
+      );
+      onClose();
+    } catch {
+      toast.error("Failed to update lock status");
+    }
   };
 
+  // ── Handle Rename ──
   const handleRename = async () => {
-    if (!newName.trim() || newName === folder.name) {
+    if (!newName.trim() || newName === item.name) {
       onClose();
       return;
     }
@@ -85,11 +118,18 @@ export default function FolderContextMenu({
     if (!key) return;
     setLoading(true);
     try {
-      const nameEncrypted = await encryptData(newName.trim(), key);
-      await updateFolder({
-        id: folder._id as Id<"folders">,
-        nameEncrypted,
-      });
+      const encrypted = await encryptData(newName.trim(), key);
+      if (itemType === "file") {
+        await updateFile({
+          id: item._id as Id<"files">,
+          nameEncrypted: encrypted,
+        });
+      } else {
+        await updateDoc({
+          id: item._id as Id<"documents">,
+          titleEncrypted: encrypted,
+        });
+      }
       toast.success("Renamed successfully");
       onClose();
     } catch {
@@ -99,34 +139,39 @@ export default function FolderContextMenu({
     }
   };
 
+  // ── Handle Color Change (Docs Only) ──
   const handleColorChange = async (color: string) => {
-    await updateFolder({
-      id: folder._id as Id<"folders">,
-      color,
-    });
+    if (itemType === "document") {
+      await updateDoc({ id: item._id as Id<"documents">, color });
+    }
     onClose();
   };
 
+  // ── Handle Delete ──
   const handleDelete = async () => {
     setLoading(true);
     try {
-      await softDelete({ id: folder._id as Id<"folders"> });
-      toast.success("Moved to Trash");
+      if (itemType === "file") {
+        await softDeleteFile({ id: item._id as Id<"files"> });
+      } else {
+        await softDeleteDoc({ id: item._id as Id<"documents"> });
+      }
+      toast.success("Moved to Recycle Bin");
       onClose();
     } catch (error) {
-      toast.error("Failed to delete folder");
+      toast.error("Failed to delete item");
     } finally {
       setLoading(false);
     }
   };
 
-  // ── Rename View ──
+  // ── Views ──
   if (view === "rename") {
     return (
       <div className="flex flex-col gap-3 p-3 animate-in fade-in slide-in-from-right-2 duration-200">
         <div className="flex flex-col gap-1.5">
           <label className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider px-1">
-            Rename Folder
+            Rename
           </label>
           <input
             value={newName}
@@ -134,7 +179,7 @@ export default function FolderContextMenu({
             onKeyDown={(e) => e.key === "Enter" && handleRename()}
             autoFocus
             className="w-full px-3 py-2 rounded-xl bg-slate-100/50 dark:bg-slate-950/50 border border-slate-200/80 dark:border-slate-800/80 text-[13px] font-medium text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-indigo-500/30 transition-all placeholder:text-slate-400"
-            placeholder="Folder name..."
+            placeholder="Name..."
           />
         </div>
         <div className="flex gap-2">
@@ -156,20 +201,20 @@ export default function FolderContextMenu({
     );
   }
 
-  // ── Color View ───
-  if (view === "color") {
+  if (view === "color" && itemType === "document") {
+    const doc = item as DecryptedDocument;
     return (
       <div className="flex flex-col gap-3 p-3 animate-in fade-in slide-in-from-right-2 duration-200">
         <label className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider px-1">
-          Folder Color
+          Doc Color
         </label>
         <div className="grid grid-cols-4 gap-2.5 p-2 bg-slate-50/50 dark:bg-slate-950/50 rounded-xl border border-slate-200/50 dark:border-slate-800/50">
-          {FOLDER_COLORS.map((c) => (
+          {DOC_COLORS.map((c) => (
             <button
               key={c}
               onClick={() => handleColorChange(c)}
               className={`w-7 h-7 rounded-full transition-all duration-300 flex items-center justify-center hover:scale-110 mx-auto ${
-                folder.color === c
+                doc.color === c
                   ? "ring-2 ring-offset-2 dark:ring-offset-slate-900 shadow-sm"
                   : "opacity-80 hover:opacity-100"
               }`}
@@ -180,7 +225,7 @@ export default function FolderContextMenu({
                 } as React.CSSProperties
               }
             >
-              {folder.color === c && (
+              {doc.color === c && (
                 <Check
                   className="w-3.5 h-3.5 text-white animate-in zoom-in duration-200"
                   strokeWidth={3}
@@ -199,19 +244,18 @@ export default function FolderContextMenu({
     );
   }
 
-  // ── Main Menu ──
   return (
     <>
       <div className="flex flex-col p-1.5 animate-in fade-in zoom-in-95 duration-200">
         <MenuButton
-          icon={folder.isStarred ? StarOff : Star}
-          label={folder.isStarred ? "Unstar" : "Star"}
+          icon={item.isStarred ? StarOff : Star}
+          label={item.isStarred ? "Unstar" : "Star"}
           onClick={handleStar}
         />
 
         <MenuButton
-          icon={folder.isLocked ? Unlock : Lock}
-          label={folder.isLocked ? "Unlock" : "Lock"}
+          icon={item.isLocked ? Unlock : Lock}
+          label={item.isLocked ? "Unlock" : "Lock"}
           onClick={handleLockToggle}
         />
 
@@ -221,11 +265,13 @@ export default function FolderContextMenu({
           onClick={() => setView("rename")}
         />
 
-        <MenuButton
-          icon={Palette}
-          label="Color"
-          onClick={() => setView("color")}
-        />
+        {itemType === "document" && (
+          <MenuButton
+            icon={Palette}
+            label="Color"
+            onClick={() => setView("color")}
+          />
+        )}
 
         <div className="h-px bg-slate-200/80 dark:bg-slate-800/80 my-1 mx-2" />
 
@@ -237,6 +283,16 @@ export default function FolderContextMenu({
         />
       </div>
 
+      <ConfirmModal
+        isOpen={showDeleteConfirm}
+        onClose={() => setShowDeleteConfirm(false)}
+        onConfirm={handleDelete}
+        title="Move to Recycle Bin?"
+        description={`Are you sure you want to move "${item.name}" to the recycle bin? You can restore it later.`}
+        confirmText="Delete"
+        loading={loading}
+      />
+
       <VerifyPinModal
         isOpen={showPinModal}
         onClose={() => setShowPinModal(false)}
@@ -244,19 +300,8 @@ export default function FolderContextMenu({
           setShowPinModal(false);
           performLockToggle();
         }}
-        title="Unlock Folder"
-        description="Enter your Master PIN to remove the lock from this folder."
-      />
-
-      {/* Delete Confirmation Modal */}
-      <ConfirmModal
-        isOpen={showDeleteConfirm}
-        onClose={() => setShowDeleteConfirm(false)}
-        onConfirm={handleDelete}
-        title="Move Folder to Trash?"
-        description={`Are you sure you want to move "${folder.name}" to the recycle bin? All files inside it will be moved too.`}
-        confirmText="Delete"
-        loading={loading}
+        title={`Unlock ${itemType === "file" ? "File" : "Document"}`}
+        description={`Enter your Master PIN to remove the lock from this ${itemType}.`}
       />
     </>
   );
