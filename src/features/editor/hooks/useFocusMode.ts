@@ -1,3 +1,4 @@
+//src/features/editor/hooks/useFocusMode.ts
 import { useState, useEffect } from "react";
 
 export function useFocusMode() {
@@ -5,7 +6,6 @@ export function useFocusMode() {
 
   const toggleFocusMode = () => setIsFocusMode((prev) => !prev);
 
-  // Escape key exits focus mode
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
       if (e.key === "Escape" && isFocusMode) {
@@ -16,7 +16,6 @@ export function useFocusMode() {
     return () => document.removeEventListener("keydown", handleKey);
   }, [isFocusMode]);
 
-  // Apply body class for focus mode
   useEffect(() => {
     if (isFocusMode) {
       document.body.classList.add("focus-mode");

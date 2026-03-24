@@ -1,4 +1,5 @@
-import { CheckCircle2, Clock, AlertCircle, Loader2 } from "lucide-react";
+//src/features/editor/components/EditorStatusBar.tsx
+import { CheckCircle2, AlertCircle, Loader2 } from "lucide-react";
 
 type SaveStatus = "saving" | "saved" | "unsaved";
 
@@ -50,16 +51,12 @@ export default function EditorStatusBar({
           <>
             <Loader2
               className={`w-3 h-3 animate-spin ${
-                isFocusMode
-                  ? "text-white/40"
-                  : "text-slate-400"
+                isFocusMode ? "text-white/40" : "text-slate-400"
               }`}
             />
             <span
               className={`text-xs font-medium ${
-                isFocusMode
-                  ? "text-white/40"
-                  : "text-slate-400"
+                isFocusMode ? "text-white/40" : "text-slate-400"
               }`}
             >
               Saving...
@@ -71,9 +68,7 @@ export default function EditorStatusBar({
           <>
             <CheckCircle2
               className={`w-3 h-3 ${
-                isFocusMode
-                  ? "text-white/50"
-                  : "text-green-500"
+                isFocusMode ? "text-white/50" : "text-green-500"
               }`}
             />
             <span
@@ -92,9 +87,7 @@ export default function EditorStatusBar({
           <>
             <AlertCircle
               className={`w-3 h-3 ${
-                isFocusMode
-                  ? "text-white/40"
-                  : "text-amber-500"
+                isFocusMode ? "text-white/40" : "text-amber-500"
               }`}
             />
             <span
@@ -113,7 +106,7 @@ export default function EditorStatusBar({
   );
 }
 
-// ── Reusable stat item ───────────────────────────────────
+// ── Reusable stat item ──
 function StatusItem({
   label,
   value,
@@ -127,18 +120,14 @@ function StatusItem({
     <div className="flex items-center gap-1">
       <span
         className={`text-xs font-medium ${
-          isFocusMode
-            ? "text-white/30"
-            : "text-slate-400 dark:text-slate-500"
+          isFocusMode ? "text-white/30" : "text-slate-400 dark:text-slate-500"
         }`}
       >
         {label}:
       </span>
       <span
         className={`text-xs font-semibold ${
-          isFocusMode
-            ? "text-white/50"
-            : "text-slate-600 dark:text-slate-300"
+          isFocusMode ? "text-white/50" : "text-slate-600 dark:text-slate-300"
         }`}
       >
         {value}

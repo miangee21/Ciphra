@@ -15,7 +15,11 @@ interface ExportMenuProps {
   onClose?: () => void;
 }
 
-export default function ExportMenu({ editor, docTitle, disabled = false, onClose }: ExportMenuProps) {
+export default function ExportMenu({
+  editor,
+  docTitle,
+  disabled = false,
+}: ExportMenuProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isExporting, setIsExporting] = useState<string | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -39,35 +43,39 @@ export default function ExportMenu({ editor, docTitle, disabled = false, onClose
     setTimeout(() => {
       try {
         const html = editor.getHTML();
-        const turndownService = new TurndownService({ headingStyle: "atx", codeBlockStyle: "fenced" });
-        
-        turndownService.keep(['table', 'tr', 'th', 'td', 'tbody', 'thead']);
-
-        // Center Text Fix
-        turndownService.addRule('centerAlignment', {
-          filter: (node) => node.style.textAlign === 'center',
-          replacement: (content) => `<div align="center">\n\n${content}\n\n</div>\n\n`
+        const turndownService = new TurndownService({
+          headingStyle: "atx",
+          codeBlockStyle: "fenced",
         });
 
-        // MAGIC FIX: MD Image Resize!
-        turndownService.addRule('imageResize', {
-          filter: 'img',
-          replacement: function (content, node: any) {
-            const src = node.getAttribute('src') || '';
-            const alt = node.getAttribute('alt') || '';
-            // TipTap style width rakhta hai, usko pakro
-            const width = node.style.width || node.getAttribute('width'); 
-            
+        turndownService.keep(["table", "tr", "th", "td", "tbody", "thead"]);
+
+        // Center Text Fix
+        turndownService.addRule("centerAlignment", {
+          filter: (node) => node.style.textAlign === "center",
+          replacement: (content) =>
+            `<div align="center">\n\n${content}\n\n</div>\n\n`,
+        });
+
+        turndownService.addRule("imageResize", {
+          filter: "img",
+          replacement: function (node: any) {
+            const src = node.getAttribute("src") || "";
+            const alt = node.getAttribute("alt") || "";
+            const width = node.style.width || node.getAttribute("width");
+
             if (width) {
-              const w = parseInt(width); // "300px" ko "300" banaya
+              const w = parseInt(width);
               return `<img src="${src}" alt="${alt}" width="${w}" />`;
             }
             return `![${alt}](${src})`;
-          }
+          },
         });
 
         const markdown = turndownService.turndown(html);
-        const blob = new Blob([markdown], { type: "text/markdown;charset=utf-8" });
+        const blob = new Blob([markdown], {
+          type: "text/markdown;charset=utf-8",
+        });
         saveAs(blob, `${getFileName()}.md`);
       } catch (error) {
         console.error("Markdown Export Error:", error);
@@ -83,32 +91,29 @@ export default function ExportMenu({ editor, docTitle, disabled = false, onClose
     setIsExporting("word");
     try {
       const parser = new DOMParser();
-      const doc = parser.parseFromString(editor.getHTML(), 'text/html');
+      const doc = parser.parseFromString(editor.getHTML(), "text/html");
 
-      // MAGIC FIX 1: Word Image Resize
-      doc.querySelectorAll('img').forEach((img: any) => {
-        let w = img.style.width || img.getAttribute('width');
-        let h = img.style.height || img.getAttribute('height');
+      doc.querySelectorAll("img").forEach((img: any) => {
+        let w = img.style.width || img.getAttribute("width");
+        let h = img.style.height || img.getAttribute("height");
         if (w) {
-          img.setAttribute('width', parseInt(w).toString());
-          img.style.width = ''; // CSS wala width uda do taake Word confuse na ho
+          img.setAttribute("width", parseInt(w).toString());
+          img.style.width = "";
         }
-        if (h && h !== 'auto') {
-          img.setAttribute('height', parseInt(h).toString());
-          img.style.height = '';
+        if (h && h !== "auto") {
+          img.setAttribute("height", parseInt(h).toString());
+          img.style.height = "";
         }
       });
 
-      // MAGIC FIX 2: Word Table Borders Re-Activated!
-      doc.querySelectorAll('table').forEach((tbl: any) => {
-        tbl.style.borderCollapse = 'collapse';
-        tbl.style.width = '100%';
-        tbl.setAttribute('border', '1');
+      doc.querySelectorAll("table").forEach((tbl: any) => {
+        tbl.style.borderCollapse = "collapse";
+        tbl.style.width = "100%";
+        tbl.setAttribute("border", "1");
       });
-      doc.querySelectorAll('th, td').forEach((cell: any) => {
-        // Explicitly har dabbe (cell) ko solid border diya hai!
-        cell.style.border = '1px solid black';
-        cell.style.padding = '8px';
+      doc.querySelectorAll("th, td").forEach((cell: any) => {
+        cell.style.border = "1px solid black";
+        cell.style.padding = "8px";
       });
 
       const cleanHtml = doc.body.innerHTML;
@@ -117,10 +122,14 @@ export default function ExportMenu({ editor, docTitle, disabled = false, onClose
         table: { row: { cantSplit: true } },
         footer: true,
         pageNumber: true,
-        documentOptions: { margins: { top: 1440, right: 1440, bottom: 1440, left: 1440 } }
+        documentOptions: {
+          margins: { top: 1440, right: 1440, bottom: 1440, left: 1440 },
+        },
       });
-      
-      const blob = new Blob([fileBuffer], { type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document" });
+
+      const blob = new Blob([fileBuffer], {
+        type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      });
       saveAs(blob, `${getFileName()}.docx`);
     } catch (error) {
       console.error("Word Export Error:", error);
@@ -128,22 +137,21 @@ export default function ExportMenu({ editor, docTitle, disabled = false, onClose
     setIsExporting(null);
     setIsOpen(false);
   };
-// ── 3. EXPORT AS PDF (THE NATIVE BROWSER METHOD) ──
+  // ── 3. EXPORT AS PDF (THE NATIVE BROWSER METHOD) ──
   const exportPDF = () => {
     if (!editor) return;
     setIsExporting("pdf");
-    
+
     setTimeout(() => {
       const originalTitle = document.title;
       const fileName = getFileName();
-      document.title = fileName; 
+      document.title = fileName;
 
       try {
         const parser = new DOMParser();
-        const doc = parser.parseFromString(editor.getHTML(), 'text/html');
+        const doc = parser.parseFromString(editor.getHTML(), "text/html");
 
-        // TipTap ke "tableWrapper" ko tor do (Unwrap kardo)
-        doc.querySelectorAll('.tableWrapper').forEach((wrapper: any) => {
+        doc.querySelectorAll(".tableWrapper").forEach((wrapper: any) => {
           const parent = wrapper.parentNode;
           while (wrapper.firstChild) {
             parent.insertBefore(wrapper.firstChild, wrapper);
@@ -151,22 +159,21 @@ export default function ExportMenu({ editor, docTitle, disabled = false, onClose
           parent.removeChild(wrapper);
         });
 
-        // MAGIC FIX 1: Table, th, td par se TipTap ka lagaya hua HAR style (width/min-width) uda do
-        doc.querySelectorAll('table, th, td').forEach((el: any) => {
-          el.removeAttribute('style');
+        doc.querySelectorAll("table, th, td").forEach((el: any) => {
+          el.removeAttribute("style");
         });
 
         const cleanHtml = doc.body.innerHTML;
 
-        const printIframe = document.createElement('iframe');
-        printIframe.style.position = 'fixed';
-        printIframe.style.top = '0';
-        printIframe.style.left = '0';
-        printIframe.style.width = '100vw';
-        printIframe.style.height = '100vh'; 
-        printIframe.style.opacity = '0';
-        printIframe.style.pointerEvents = 'none'; 
-        printIframe.style.zIndex = '-9999';
+        const printIframe = document.createElement("iframe");
+        printIframe.style.position = "fixed";
+        printIframe.style.top = "0";
+        printIframe.style.left = "0";
+        printIframe.style.width = "100vw";
+        printIframe.style.height = "100vh";
+        printIframe.style.opacity = "0";
+        printIframe.style.pointerEvents = "none";
+        printIframe.style.zIndex = "-9999";
         document.body.appendChild(printIframe);
 
         const iframeDoc = printIframe.contentWindow?.document;
@@ -271,19 +278,18 @@ export default function ExportMenu({ editor, docTitle, disabled = false, onClose
           setTimeout(() => {
             printIframe.contentWindow?.focus();
             printIframe.contentWindow?.print();
-            
+
             setTimeout(() => {
               document.body.removeChild(printIframe);
-              document.title = originalTitle; 
+              document.title = originalTitle;
               setIsExporting(null);
               setIsOpen(false);
             }, 1000);
-          }, 300); 
+          }, 300);
         };
-
       } catch (error) {
         console.error("PDF Native Export Error:", error);
-        document.title = originalTitle; 
+        document.title = originalTitle;
         setIsExporting(null);
         setIsOpen(false);
       }
@@ -296,11 +302,17 @@ export default function ExportMenu({ editor, docTitle, disabled = false, onClose
         onClick={() => setIsOpen(!isOpen)}
         disabled={disabled || isExporting !== null}
         className={`w-8 h-8 flex items-center justify-center rounded-lg transition-all ${
-          isOpen ? "bg-indigo-100 dark:bg-indigo-500/20 text-indigo-600 dark:text-sky-400 shadow-sm" : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white"
+          isOpen
+            ? "bg-indigo-100 dark:bg-indigo-500/20 text-indigo-600 dark:text-sky-400 shadow-sm"
+            : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white"
         } disabled:opacity-30 disabled:cursor-not-allowed`}
         title="Export Document"
       >
-        {isExporting ? <Loader2 className="w-4 h-4 animate-spin text-indigo-500" /> : <Download className="w-4 h-4 text-indigo-500" />}
+        {isExporting ? (
+          <Loader2 className="w-4 h-4 animate-spin text-indigo-500" />
+        ) : (
+          <Download className="w-4 h-4 text-indigo-500" />
+        )}
       </button>
 
       {isOpen && !disabled && (
@@ -308,19 +320,31 @@ export default function ExportMenu({ editor, docTitle, disabled = false, onClose
           <div className="px-2 py-1.5 text-[10px] font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-0.5">
             Export As
           </div>
-          
-          <button onClick={exportPDF} disabled={isExporting !== null} className="flex items-center gap-3 w-full text-left px-2.5 py-2 text-[13px] font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg transition-colors">
-            <FileText className="w-4 h-4 text-red-500" /> 
+
+          <button
+            onClick={exportPDF}
+            disabled={isExporting !== null}
+            className="flex items-center gap-3 w-full text-left px-2.5 py-2 text-[13px] font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg transition-colors"
+          >
+            <FileText className="w-4 h-4 text-red-500" />
             PDF Document
           </button>
-          
-          <button onClick={exportWord} disabled={isExporting !== null} className="flex items-center gap-3 w-full text-left px-2.5 py-2 text-[13px] font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg transition-colors">
-            <FileDown className="w-4 h-4 text-blue-500" /> 
+
+          <button
+            onClick={exportWord}
+            disabled={isExporting !== null}
+            className="flex items-center gap-3 w-full text-left px-2.5 py-2 text-[13px] font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg transition-colors"
+          >
+            <FileDown className="w-4 h-4 text-blue-500" />
             Word (.docx)
           </button>
-          
-          <button onClick={exportMarkdown} disabled={isExporting !== null} className="flex items-center gap-3 w-full text-left px-2.5 py-2 text-[13px] font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg transition-colors">
-            <FileCode className="w-4 h-4 text-slate-500 dark:text-slate-400" /> 
+
+          <button
+            onClick={exportMarkdown}
+            disabled={isExporting !== null}
+            className="flex items-center gap-3 w-full text-left px-2.5 py-2 text-[13px] font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg transition-colors"
+          >
+            <FileCode className="w-4 h-4 text-slate-500 dark:text-slate-400" />
             Markdown (.md)
           </button>
         </div>

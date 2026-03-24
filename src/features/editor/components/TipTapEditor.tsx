@@ -22,28 +22,31 @@ import { encryptData } from "@/lib/crypto/aes";
 import { ramStore } from "@/lib/storage/ram";
 import type { Id } from "../../../../convex/_generated/dataModel";
 import { Extension } from "@tiptap/core";
-import CodeBlock from '@tiptap/extension-code-block';
-import { ReactNodeViewRenderer } from '@tiptap/react';
-import CodeBlockComponent from './CodeBlockComponent';
+import CodeBlock from "@tiptap/extension-code-block";
+import { ReactNodeViewRenderer } from "@tiptap/react";
+import CodeBlockComponent from "./CodeBlockComponent";
 
-// ── MAGIC ENGINE: TipTap ko Font Size sikhane wala extension ──
 const FontSize = Extension.create({
-  name: 'fontSize',
-  addOptions() { return { types: ['textStyle'] } },
+  name: "fontSize",
+  addOptions() {
+    return { types: ["textStyle"] };
+  },
   addGlobalAttributes() {
-    return [{
-      types: this.options.types,
-      attributes: {
-        fontSize: {
-          default: null,
-          parseHTML: element => element.style.fontSize || null,
-          renderHTML: attributes => {
-            if (!attributes.fontSize) return {};
-            return { style: `font-size: ${attributes.fontSize}` };
+    return [
+      {
+        types: this.options.types,
+        attributes: {
+          fontSize: {
+            default: null,
+            parseHTML: (element) => element.style.fontSize || null,
+            renderHTML: (attributes) => {
+              if (!attributes.fontSize) return {};
+              return { style: `font-size: ${attributes.fontSize}` };
+            },
           },
         },
       },
-    }]
+    ];
   },
 });
 
@@ -75,52 +78,55 @@ export default function TipTapEditor({
     extensions: [
       StarterKit,
       SlashCommands,
-      TextStyle, // <-- Ye color aur font size ko support karta hai
-      FontSize,  // <-- Hamara banaya hua Magic Engine!
+      TextStyle,
+      FontSize,
       Underline,
       TextAlign.configure({ types: ["heading", "paragraph"] }),
-      Link.configure({ 
+      Link.configure({
         openOnClick: false,
         HTMLAttributes: {
-          class: 'text-blue-600 dark:text-sky-400 underline decoration-blue-500/40 underline-offset-4 cursor-pointer font-semibold',
-        }
+          class:
+            "text-blue-600 dark:text-sky-400 underline decoration-blue-500/40 underline-offset-4 cursor-pointer font-semibold",
+        },
       }),
       Table.configure({ resizable: true }),
       TableRow,
       TableCell,
       TableHeader,
-      ResizableImage, // Default hat gaya, hamara drag-to-resize lag gaya!
+      ResizableImage,
       Color,
       TextStyle,
       Highlight.configure({ multicolor: true }),
       Typography,
-      Placeholder.configure({ placeholder: "Start writing... or type '/' for commands" }),
+      Placeholder.configure({
+        placeholder: "Start writing... or type '/' for commands",
+      }),
 
       CodeBlock.extend({
-      addNodeView() {
-        return ReactNodeViewRenderer(CodeBlockComponent);
-      },
-    }).configure({
-      languageClassPrefix: 'language-',
-    }),
-  ],
-    
+        addNodeView() {
+          return ReactNodeViewRenderer(CodeBlockComponent);
+        },
+      }).configure({
+        languageClassPrefix: "language-",
+      }),
+    ],
+
     content: initialContent ? JSON.parse(initialContent) : "",
     editorProps: {
       attributes: {
         class: [
           "prose prose-slate dark:prose-invert max-w-none w-full h-full focus:outline-none",
-          "px-4 sm:px-6 py-6", // Vertical padding thori barhai
+          "px-4 sm:px-6 py-6",
           "prose-headings:font-bold prose-headings:tracking-tight",
           "prose-p:leading-relaxed",
-          // ── Lists & Blockquote Specific Styling (Fix!) ──
           "prose-ul:list-disc prose-ul:ml-5 prose-ul:my-2 prose-ul:marker:text-indigo-500",
           "prose-ol:list-decimal prose-ol:ml-5 prose-ol:my-2 prose-ol:marker:text-indigo-500",
           "prose-blockquote:border-l-4 prose-blockquote:border-slate-300 dark:prose-blockquote:border-slate-700 prose-blockquote:pl-5 prose-blockquote:my-4 prose-blockquote:italic",
-          // ── Tables ──
           "prose-table:border-collapse prose-table:w-full prose-table:my-4",
           isFocusMode ? "pt-20" : "",
-        ].filter(Boolean).join(" "),
+        ]
+          .filter(Boolean)
+          .join(" "),
       },
     },
     onUpdate: ({ editor }) => {
@@ -131,12 +137,15 @@ export default function TipTapEditor({
 
       if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
       onSaveStatusChange("saving");
-      
+
       saveTimerRef.current = setTimeout(async () => {
         const key = ramStore.getKey();
         if (!key) return;
         try {
-          const contentEncrypted = await encryptData(JSON.stringify(editor.getJSON()), key);
+          const contentEncrypted = await encryptData(
+            JSON.stringify(editor.getJSON()),
+            key,
+          );
           await updateDocument({ id: docId, contentEncrypted });
           onSaveStatusChange("saved");
         } catch {
@@ -166,11 +175,13 @@ export default function TipTapEditor({
   }, [editor, isReadOnly]);
 
   return (
-    // ── MAGIC ZOOM: CSS Zoom puri UI ko scale kar dega bina margin torey ──
-    <div className="w-full flex-1 flex flex-col bg-transparent" style={{ zoom: `${zoomLevel}%` }}>
-      <EditorContent 
-        editor={editor} 
-        className="w-full flex-1 [&>.ProseMirror]:min-h-[70vh] [&>.ProseMirror]:outline-none" 
+    <div
+      className="w-full flex-1 flex flex-col bg-transparent"
+      style={{ zoom: `${zoomLevel}%` }}
+    >
+      <EditorContent
+        editor={editor}
+        className="w-full flex-1 [&>.ProseMirror]:min-h-[70vh] [&>.ProseMirror]:outline-none"
       />
     </div>
   );

@@ -1,3 +1,4 @@
+//src/features/editor/hooks/useAutoSave.ts
 import { useRef, useCallback } from "react";
 import { useMutation } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
@@ -10,7 +11,7 @@ type SaveStatus = "saving" | "saved" | "unsaved";
 
 export function useAutoSave(
   docId: Id<"documents">,
-  onStatusChange: (status: SaveStatus) => void
+  onStatusChange: (status: SaveStatus) => void,
 ) {
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const updateDocument = useMutation(api.documents.updateDocument);
@@ -29,7 +30,7 @@ export function useAutoSave(
         try {
           const contentEncrypted = await encryptData(
             JSON.stringify(editor.getJSON()),
-            key
+            key,
           );
           await updateDocument({ id: docId, contentEncrypted });
           onStatusChange("saved");
@@ -38,7 +39,7 @@ export function useAutoSave(
         }
       }, 500);
     },
-    [docId, onStatusChange, updateDocument]
+    [docId, onStatusChange, updateDocument],
   );
 
   const flush = useCallback(
@@ -52,7 +53,7 @@ export function useAutoSave(
       try {
         const contentEncrypted = await encryptData(
           JSON.stringify(editor.getJSON()),
-          key
+          key,
         );
         await updateDocument({ id: docId, contentEncrypted });
         onStatusChange("saved");
@@ -60,7 +61,7 @@ export function useAutoSave(
         onStatusChange("unsaved");
       }
     },
-    [docId, onStatusChange, updateDocument]
+    [docId, onStatusChange, updateDocument],
   );
 
   const cleanup = useCallback(() => {
