@@ -7,6 +7,7 @@ import CreateFolderModal from "./components/CreateFolderModal";
 import StarredSection from "./components/StarredSection";
 import FolderGrid from "./components/FolderGrid";
 import EmptyState from "@/components/common/EmptyState";
+import SearchEmptyState from "@/components/common/SearchEmptyState";
 import TopNav from "@/components/layout/TopNav";
 import type { Id } from "../../../convex/_generated/dataModel";
 import { ramStore } from "@/lib/storage/ram";
@@ -51,6 +52,7 @@ export default function HomePage() {
   );
   const [isDecrypting, setIsDecrypting] = useState(true);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
   // Dropdown State
   const [isSortDropdownOpen, setIsSortDropdownOpen] = useState(false);
@@ -131,6 +133,11 @@ export default function HomePage() {
   // ── 3. FILTER & SORT LOGIC ──
   const filteredAndSortedFolders = useMemo(() => {
     let result = [...decryptedFolders];
+    // ── Search LOGIC ──
+    if (searchQuery.trim()) {
+      const lowerQuery = searchQuery.toLowerCase();
+      result = result.filter((f) => f.name.toLowerCase().includes(lowerQuery));
+    }
 
     result.sort((a, b) => {
       if (sortOption === "name-asc") return a.name.localeCompare(b.name);
@@ -141,7 +148,7 @@ export default function HomePage() {
     });
 
     return result;
-  }, [decryptedFolders, sortOption]);
+  }, [decryptedFolders, sortOption, searchQuery]);
 
   const starredFolders = filteredAndSortedFolders.filter((f) => f.isStarred);
   const allFolders = filteredAndSortedFolders;
@@ -158,7 +165,11 @@ export default function HomePage() {
   return (
     <div className="flex-1 w-full flex flex-col h-screen overflow-hidden bg-slate-50 dark:bg-[#0B1120] transition-colors duration-500 relative">
       {/* Top Navigation */}
-      <TopNav />
+      <TopNav
+        showSearch={true}
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+      />
       {/* ── THE BEAUTIFUL 4px SCROLLBAR (Restored & Applied Globally) ── */}
       <style>{`
         ::-webkit-scrollbar {
@@ -268,7 +279,6 @@ export default function HomePage() {
                 )}
               </div>
 
-              {/* Segmented View Mode Toggle */}
               <div className="flex items-center p-1 bg-slate-200/50 dark:bg-slate-800/60 rounded-xl backdrop-blur-md border border-slate-300/30 dark:border-slate-700/50">
                 <button
                   onClick={() => setViewMode("grid")}
@@ -284,7 +294,6 @@ export default function HomePage() {
                 </button>
               </div>
 
-              {/* Premium New Vault Button */}
               <button
                 onClick={() => setIsCreateModalOpen(true)}
                 className="group relative flex items-center gap-2 px-5 py-2.5 bg-indigo-600 dark:bg-indigo-500 hover:bg-indigo-700 dark:hover:bg-indigo-400 text-white rounded-xl text-[13px] font-bold shadow-[0_8px_20px_-6px_rgba(99,102,241,0.6)] hover:shadow-[0_8px_25px_-4px_rgba(99,102,241,0.8)] hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300 overflow-hidden"
@@ -310,6 +319,13 @@ export default function HomePage() {
                 description="Create your first secure vault to start storing encrypted files."
                 actionLabel="Create Vault"
                 onAction={() => setIsCreateModalOpen(true)}
+              />
+            </div>
+          ) : allFolders.length === 0 && searchQuery.trim() !== "" ? (
+            <div className="flex-1 flex items-center justify-center mt-10">
+              <SearchEmptyState
+                searchQuery={searchQuery}
+                onClear={() => setSearchQuery("")}
               />
             </div>
           ) : (

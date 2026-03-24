@@ -95,7 +95,6 @@ export default function TopNav({
               <input
                 value={searchQuery}
                 onChange={(e) => onSearchChange?.(e.target.value)}
-                onFocus={() => navigate("/search")}
                 placeholder="Search vault..."
                 className="w-full pl-9 pr-4 py-1.5 text-sm rounded-xl bg-slate-100/80 dark:bg-slate-900/80 border border-transparent focus:border-indigo-500/50 dark:focus:border-sky-500/50 focus:bg-white dark:focus:bg-slate-900 focus:ring-4 focus:ring-indigo-500/10 dark:focus:ring-sky-500/10 text-slate-900 dark:text-white placeholder:text-slate-400 outline-none transition-all shadow-inner dark:shadow-none"
               />
@@ -111,7 +110,6 @@ export default function TopNav({
               <input
                 value={searchQuery}
                 onChange={(e) => onSearchChange?.(e.target.value)}
-                onFocus={() => navigate("/search")}
                 placeholder="Search..."
                 className="w-full pl-8 pr-3 py-1.5 text-[13px] rounded-xl bg-slate-100/80 dark:bg-slate-900/80 border border-transparent focus:border-indigo-500/50 dark:focus:border-sky-500/50 focus:bg-white dark:focus:bg-slate-900 focus:ring-2 focus:ring-indigo-500/10 dark:focus:ring-sky-500/10 text-slate-900 dark:text-white placeholder:text-slate-400 outline-none transition-all"
               />

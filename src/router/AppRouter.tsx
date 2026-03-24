@@ -11,7 +11,6 @@ import HomePage from "@/features/home/HomePage";
 import FolderPage from "@/features/folder/FolderPage";
 import EditorPage from "@/features/editor/EditorPage";
 import RecycleBinPage from "@/features/recycle/RecycleBinPage";
-import SearchPage from "@/features/search/SearchPage";
 import SettingsPage from "@/features/settings/SettingsPage";
 import LockScreen from "@/features/lock/LockScreen";
 
@@ -80,14 +79,6 @@ export default function AppRouter() {
           element={
             <PrivateRoute>
               <RecycleBinPage />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/search"
-          element={
-            <PrivateRoute>
-              <SearchPage />
             </PrivateRoute>
           }
         />

@@ -14,6 +14,7 @@ import CreateDocModal from "./components/CreateDocModal";
 import StarredItemsSection from "./components/StarredItemsSection";
 import UploadFileModal from "./components/UploadFileModal";
 import EmptyState from "@/components/common/EmptyState";
+import SearchEmptyState from "@/components/common/SearchEmptyState";
 import type { Id } from "../../../convex/_generated/dataModel";
 import { FolderOpen, ArrowLeft } from "lucide-react";
 
@@ -57,6 +58,7 @@ export default function FolderPage() {
   const [showUpload, setShowUpload] = useState(false);
   const [decryptedFiles, setDecryptedFiles] = useState<DecryptedFile[]>([]);
   const [decryptedDocs, setDecryptedDocs] = useState<DecryptedDocument[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
 
   // ── Intelligent Memory (Local Storage) ──
   const [viewMode, setViewMode] = useState<ViewMode>(() => {
@@ -160,11 +162,19 @@ export default function FolderPage() {
   }, [rawDocs]);
 
   // ── Filtering & Sorting Logic ──
-  const filteredFiles = decryptedFiles.filter(
-    (f) => filter === "all" || filter === "document" || f.type === filter,
-  );
+  const lowerQuery = searchQuery.toLowerCase();
+
+  const filteredFiles = decryptedFiles.filter((f) => {
+    const matchesType =
+      filter === "all" || filter === "document" || f.type === filter;
+    const matchesSearch = f.name.toLowerCase().includes(lowerQuery);
+    return matchesType && matchesSearch;
+  });
+
   const filteredDocs =
-    filter === "all" || filter === "document" ? decryptedDocs : [];
+    filter === "all" || filter === "document"
+      ? decryptedDocs.filter((d) => d.name.toLowerCase().includes(lowerQuery))
+      : [];
 
   const sortItems = <
     T extends { name: string; createdAt: number; updatedAt: number },
@@ -209,7 +219,11 @@ export default function FolderPage() {
 
       {/* 1. Navbar  */}
       <div className="shrink-0 z-100">
-        <TopNav showSearch={true} searchQuery="" onSearchChange={() => {}} />
+        <TopNav
+          showSearch={true}
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+        />
       </div>
 
       {/* 2. Scrollable Content Area */}
@@ -256,7 +270,7 @@ export default function FolderPage() {
                 Unlocking your vault...
               </p>
             </div>
-          ) : isEmpty ? (
+          ) : decryptedFiles.length === 0 && decryptedDocs.length === 0 ? (
             <div className="py-12">
               <EmptyState
                 icon={FolderOpen}
@@ -264,6 +278,23 @@ export default function FolderPage() {
                 description="Your encrypted files and documents will appear here once you add them."
                 actionLabel="Create First Document"
                 onAction={() => setShowCreateDoc(true)}
+              />
+            </div>
+          ) : isEmpty && searchQuery.trim() !== "" ? (
+            <div className="py-12">
+              <SearchEmptyState
+                searchQuery={searchQuery}
+                onClear={() => setSearchQuery("")}
+              />
+            </div>
+          ) : isEmpty ? (
+            <div className="py-12">
+              <EmptyState
+                icon={FolderOpen}
+                title="No items found"
+                description="No items match your selected filter category."
+                actionLabel="Clear Filter"
+                onAction={() => setFilter("all")}
               />
             </div>
           ) : (
