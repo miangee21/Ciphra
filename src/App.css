@@ -128,3 +128,54 @@
     @apply font-sans;
   }
 }
+
+/* TipTap Editor Styles */
+.ProseMirror table {
+  border-collapse: collapse;
+  width: 100%;
+}
+.ProseMirror table td,
+.ProseMirror table th {
+  border: 1px solid #e2e8f0;
+  padding: 8px 12px;
+  min-width: 80px;
+  position: relative;
+}
+.dark .ProseMirror table td,
+.dark .ProseMirror table th {
+  border-color: #334155;
+}
+.ProseMirror table .selectedCell {
+  background: rgba(99, 102, 241, 0.1);
+}
+.ProseMirror .column-resize-handle {
+  position: absolute;
+  right: -2px;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background-color: #6366f1;
+  cursor: col-resize;
+  pointer-events: none;
+}
+.ProseMirror p.is-editor-empty:first-child::before {
+  color: #94a3b8;
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
+}
+
+/* Focus mode — hide topnav */
+body.focus-mode header {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-100%);
+  transition: all 0.3s ease;
+}
+body:not(.focus-mode) header {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+  transition: all 0.3s ease;
+}
