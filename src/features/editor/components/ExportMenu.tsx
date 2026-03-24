@@ -4,6 +4,7 @@ import type { Editor } from "@tiptap/react";
 import { Download, FileText, FileDown, FileCode, Loader2 } from "lucide-react";
 import TurndownService from "turndown";
 import { saveAs } from "file-saver";
+import { toast } from "sonner";
 
 // @ts-ignore
 import HTMLtoDOCX from "html-to-docx";
@@ -42,7 +43,28 @@ export default function ExportMenu({
     setIsExporting("md");
     setTimeout(() => {
       try {
-        const html = editor.getHTML();
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(editor.getHTML(), "text/html");
+
+        doc.querySelectorAll(".tableWrapper").forEach((wrapper: any) => {
+          const parent = wrapper.parentNode;
+          while (wrapper.firstChild) {
+            parent.insertBefore(wrapper.firstChild, wrapper);
+          }
+          parent.removeChild(wrapper);
+        });
+
+        doc.querySelectorAll("table").forEach((tbl: any) => {
+          tbl.removeAttribute("style");
+          tbl.setAttribute("width", "100%");
+        });
+
+        doc.querySelectorAll("th, td").forEach((cell: any) => {
+          cell.removeAttribute("style");
+        });
+
+        const cleanHtml = doc.body.innerHTML;
+
         const turndownService = new TurndownService({
           headingStyle: "atx",
           codeBlockStyle: "fenced",
@@ -50,7 +72,6 @@ export default function ExportMenu({
 
         turndownService.keep(["table", "tr", "th", "td", "tbody", "thead"]);
 
-        // Center Text Fix
         turndownService.addRule("centerAlignment", {
           filter: (node) => node.style.textAlign === "center",
           replacement: (content) =>
@@ -59,7 +80,7 @@ export default function ExportMenu({
 
         turndownService.addRule("imageResize", {
           filter: "img",
-          replacement: function (node: any) {
+          replacement: function (_content: any, node: any) {
             const src = node.getAttribute("src") || "";
             const alt = node.getAttribute("alt") || "";
             const width = node.style.width || node.getAttribute("width");
@@ -72,11 +93,12 @@ export default function ExportMenu({
           },
         });
 
-        const markdown = turndownService.turndown(html);
+        const markdown = turndownService.turndown(cleanHtml);
         const blob = new Blob([markdown], {
           type: "text/markdown;charset=utf-8",
         });
         saveAs(blob, `${getFileName()}.md`);
+        toast.success("Markdown file saved successfully!");
       } catch (error) {
         console.error("Markdown Export Error:", error);
       }
@@ -131,6 +153,7 @@ export default function ExportMenu({
         type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
       });
       saveAs(blob, `${getFileName()}.docx`);
+      toast.success("Word document saved successfully!");
     } catch (error) {
       console.error("Word Export Error:", error);
     }
