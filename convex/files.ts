@@ -107,8 +107,14 @@ export const restoreFile = mutation({
 export const permanentDeleteFile = mutation({
   args: { id: v.id("files") },
   handler: async (ctx, { id }) => {
-    // Delete from storage too
-    await ctx.storage.delete(id as unknown as string);
+    // 1. find record in database
+    const file = await ctx.db.get(id);
+    if (!file) throw new Error("File not found");
+
+    if (file.storageId) {
+      await ctx.storage.delete(file.storageId as any);
+    }
+
     await ctx.db.delete(id);
   },
 });

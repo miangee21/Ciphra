@@ -104,7 +104,12 @@ export const permanentDeleteFolder = mutation({
       .query("files")
       .withIndex("by_folder", (q) => q.eq("folderId", id))
       .collect();
-    for (const file of files) await ctx.db.delete(file._id);
+    for (const file of files) {
+      if (file.storageId) {
+        await ctx.storage.delete(file.storageId as any);
+      }
+      await ctx.db.delete(file._id);
+    }
 
     // Delete folder
     await ctx.db.delete(id);
