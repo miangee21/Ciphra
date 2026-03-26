@@ -4,11 +4,11 @@
   "pub_date": "2026-03-26T11:30:00Z",
   "platforms": {
     "windows-x86_64": {
-      "signature": "",
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUZ0MrKzJNTkpBdlRhNGxWYlZ6YmNuMElmTVAzbkpORjVrVG1hV3V2M3VQVi85azF2SmZiMGlxd081UUp4dGhOOHB5UGJaQW40bWRiZWo4bkRQYnFONFZteFNtUFpkZ1FNPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzc0NTI2NTQzCWZpbGU6Q2lwaHJhXzAuMS4wX3g2NC1zZXR1cC5leGUKeDRzV3orSXZ4ZDVEdGVWNm1nVWNQbUdyUzA3UkF0VmU5UVg3cWZDTlNhd2E0cGYzNDQyUjFVWUFlc1hPWHNXNWR3ODAzVUVjZjVWVFpXcXZiWnc3Q1E9PQo=",
       "url": "https://github.com/miangee21/Ciphra/releases/download/v0.1.0/Ciphra_0.1.0_x64-setup.exe"
     },
     "linux-x86_64": {
-      "signature": "",
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUZ0MrKzJNTkpBdlgxZjBzRmJyOTBiMjRMQnR3Sk42bzBoRUJOQ0oxeTFXSXlJWkQ3UUcwY1E2K3lsS1VXbUppUWpvTTV4U2tYTnd5MThvc05MTS84SXZhaCszL2haRXdJPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzc0NTI5MzE2CWZpbGU6Q2lwaHJhXzAuMS4wX2FtZDY0LkFwcEltYWdlCjdsdTREOW9Yc2podEZneENoa2tVUjgvVTlhV0RGSjU2Nlc3YlIxb1NXRCtXeEVCblphNTBwYStHb2xDOWZZeEVkd1F2NTlrU25uQkhGK0JJdHpJYUNnPT0K",
       "url": "https://github.com/miangee21/Ciphra/releases/download/v0.1.0/Ciphra_0.1.0_amd64.AppImage"
     }
   }
