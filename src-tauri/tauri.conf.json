@@ -36,5 +36,13 @@
         "installerIcon": "icons/icon.ico"
       }
     }
+  },
+  "plugins": {
+    "updater": {
+      "endpoints": [
+        "https://raw.githubusercontent.com/miangee21/Ciphra/master/updater.json"
+      ],
+      "pubkey": "dW50cnVzdGVkIHZhbHVl"
+    }
   }
 }

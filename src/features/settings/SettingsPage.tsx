@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import TopNav from "@/components/layout/TopNav";
 import AppLockSettings from "../lock/components/AppLockSettings";
 import SettingsSidebar, { Tab } from "./components/SettingsSidebar";
+import AboutSettings from "./components/AboutSettings";
 
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState<Tab>("security");
@@ -56,6 +57,8 @@ export default function SettingsPage() {
                   Data settings coming soon...
                 </div>
               )}
+
+              {activeTab === "about" && <AboutSettings />}
             </div>
           </div>
         </div>

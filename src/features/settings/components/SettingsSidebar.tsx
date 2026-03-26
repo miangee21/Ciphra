@@ -5,13 +5,14 @@ import {
   Shield,
   HardDrive,
   Database,
+  Info,
   ArrowLeft,
   ChevronRight,
   PanelLeftClose,
   PanelLeftOpen,
 } from "lucide-react";
 
-export type Tab = "appearance" | "security" | "storage" | "data";
+export type Tab = "appearance" | "security" | "storage" | "data" | "about";
 
 interface SettingsSidebarProps {
   activeTab: Tab;
@@ -24,6 +25,7 @@ const TABS = [
   { id: "security", label: "Security", icon: Shield },
   { id: "storage", label: "Storage", icon: HardDrive },
   { id: "data", label: "Data", icon: Database },
+  { id: "about", label: "About & Updates", icon: Info },
 ] as const;
 
 export default function SettingsSidebar({

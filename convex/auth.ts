@@ -1,4 +1,5 @@
 //convex/auth.ts
+/// <reference types="node" />
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 
@@ -88,5 +89,13 @@ export const deleteAccount = mutation({
 
     // Delete user
     await ctx.db.delete(userId);
+  },
+});
+
+// Get minimum required version from Convex Environment Variables
+export const getMinRequiredVersion = query({
+  args: {},
+  handler: async () => {
+    return process.env.MIN_REQUIRED_VERSION ?? "0.1.0";
   },
 });
