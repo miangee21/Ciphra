@@ -1,0 +1,15 @@
+{
+  "version": "0.1.0",
+  "notes": "Ciphra v0.1.0 is here! A fully encrypted notes app to create and manage rich documents with images and tables.",
+  "pub_date": "2026-03-26T11:30:00Z",
+  "platforms": {
+    "windows-x86_64": {
+      "signature": "",
+      "url": "https://github.com/miangee21/Ciphra/releases/download/v0.1.0/Ciphra_0.1.0_x64-setup.exe"
+    },
+    "linux-x86_64": {
+      "signature": "",
+      "url": "https://github.com/miangee21/Ciphra/releases/download/v0.1.0/Ciphra_0.1.0_amd64.AppImage"
+    }
+  }
+}

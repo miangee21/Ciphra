@@ -1,6 +1,5 @@
 //convex/recycleBin.ts
-import { internalMutation, mutation, query } from "./_generated/server";
-import { v } from "convex/values";
+import { internalMutation } from "./_generated/server";
 
 const THIRTY_DAYS = 30 * 24 * 60 * 60 * 1000;
 
