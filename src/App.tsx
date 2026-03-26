@@ -31,10 +31,14 @@ export default function App() {
 
     const setupListener = async () => {
       const appWindow = getCurrentWindow();
-      unlisten = await appWindow.onCloseRequested(() => {
+      unlisten = await appWindow.onCloseRequested((event) => {
+        event.preventDefault();
         if (isLockEnabled) {
           setLocked(true);
         }
+        setTimeout(async () => {
+          await appWindow.destroy();
+        }, 100);
       });
     };
 
