@@ -130,7 +130,11 @@ export default function AppRouter() {
         setIsUpdating(false);
       }
     } catch (err) {
-      toast.error("Failed to download update.", { id: toastId });
+      console.error("Update pending on server:", err);
+      toast.error(
+        "Update is still rolling out to the server. Please try again in a few minutes.",
+        { id: toastId, duration: 5000 },
+      );
       setIsUpdating(false);
     }
   }

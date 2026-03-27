@@ -60,7 +60,7 @@ export const getUserById = query({
 export const deleteAccount = mutation({
   args: { userId: v.id("users") },
   handler: async (ctx, { userId }) => {
-    // Delete all folders
+    // 1. Delete all folders
     const folders = await ctx.db
       .query("folders")
       .withIndex("by_user", (q) => q.eq("userId", userId))
@@ -69,7 +69,7 @@ export const deleteAccount = mutation({
       await ctx.db.delete(folder._id);
     }
 
-    // Delete all documents
+    // 2. Delete all documents
     const documents = await ctx.db
       .query("documents")
       .withIndex("by_user", (q) => q.eq("userId", userId))
@@ -78,16 +78,19 @@ export const deleteAccount = mutation({
       await ctx.db.delete(doc._id);
     }
 
-    // Delete all files
+    // 3. Delete all files AND Storage Bucket Data
     const files = await ctx.db
       .query("files")
       .withIndex("by_user", (q) => q.eq("userId", userId))
       .collect();
     for (const file of files) {
+      if (file.storageId) {
+        await ctx.storage.delete(file.storageId as any);
+      }
       await ctx.db.delete(file._id);
     }
 
-    // Delete user
+    // 4. Finally, Delete the User
     await ctx.db.delete(userId);
   },
 });

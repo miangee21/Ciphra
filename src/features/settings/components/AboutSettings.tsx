@@ -1,9 +1,12 @@
 // src/features/settings/components/AboutSettings.tsx
 import { useState, useEffect } from "react";
 import { RefreshCw, Github, Heart, MessageCircle } from "lucide-react";
-import { toast } from "sonner";
+import UpdateProgressToast from "@/components/common/UpdateProgressToast";
 import { getVersion } from "@tauri-apps/api/app";
-import { open } from "@tauri-apps/plugin-shell";
+import { openUrl } from "@tauri-apps/plugin-opener";
+import { check } from "@tauri-apps/plugin-updater";
+import { relaunch } from "@tauri-apps/plugin-process";
+import { toast } from "sonner";
 
 export default function AboutSettings() {
   const [checking, setChecking] = useState(false);
@@ -29,7 +32,7 @@ export default function AboutSettings() {
   const handleOpenLink = async (url: string) => {
     try {
       if (typeof window !== "undefined" && "__TAURI_INTERNALS__" in window) {
-        await open(url);
+        await openUrl(url);
       } else {
         window.open(url, "_blank");
       }
@@ -38,14 +41,72 @@ export default function AboutSettings() {
     }
   };
 
-  const handleCheckUpdate = () => {
+  const handleCheckUpdate = async () => {
+    if (checking) return;
     setChecking(true);
-    setTimeout(() => {
-      setChecking(false);
+    const toastId = toast.loading("Checking for updates...");
+
+    try {
+      if (typeof window === "undefined" || !("__TAURI_INTERNALS__" in window)) {
+        toast.error("Updates are only supported in the desktop app.", {
+          id: toastId,
+        });
+        setChecking(false);
+        return;
+      }
+
+      const update = await check();
+
+      if (update) {
+        let downloaded = 0;
+        let contentLength = 0;
+
+        await update.downloadAndInstall((event) => {
+          if (event.event === "Started") {
+            contentLength = event.data.contentLength || 0;
+            toast(
+              <UpdateProgressToast progress={0} version={update.version} />,
+              { id: toastId, duration: Infinity },
+            );
+          } else if (event.event === "Progress") {
+            downloaded += event.data.chunkLength;
+            if (contentLength > 0) {
+              const percent = Math.round((downloaded / contentLength) * 100);
+              toast(
+                <UpdateProgressToast
+                  progress={percent}
+                  version={update.version}
+                />,
+                { id: toastId, duration: Infinity },
+              );
+            }
+          } else if (event.event === "Finished") {
+            toast.loading("Extracting and installing...", { id: toastId });
+          }
+        });
+
+        toast.success("Update installed! Restarting app...", {
+          id: toastId,
+          duration: 4000,
+        });
+        setTimeout(relaunch, 1500);
+      } else {
+        toast.success("You are up to date!", {
+          id: toastId,
+          description: `Ciphra ${appVersion} is the latest version available.`,
+          duration: 4000,
+        });
+        setChecking(false);
+      }
+    } catch (error) {
+      console.error("Update check failed (Likely no update available):", error);
       toast.success("You are up to date!", {
+        id: toastId,
         description: `Ciphra ${appVersion} is the latest version available.`,
+        duration: 4000,
       });
-    }, 1500);
+      setChecking(false);
+    }
   };
 
   return (
@@ -117,14 +178,16 @@ export default function AboutSettings() {
 
         <div className="flex items-center gap-3">
           <button
-            onClick={() => handleOpenLink("https://github.com/Hassan-X")} // Apni GitHub Repo ka link daal dein
+            onClick={() =>
+              handleOpenLink("https://github.com/miangee21/Ciphra")
+            }
             className="flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800/50 hover:bg-slate-200 dark:hover:bg-slate-800 text-[12px] font-semibold text-slate-600 dark:text-slate-300 transition-colors border border-transparent dark:border-slate-700/50"
           >
             <Github className="w-4 h-4" />
             GitHub
           </button>
           <button
-            onClick={() => handleOpenLink("https://discord.gg/yourlink")} // Apna Discord link daal dein
+            onClick={() => handleOpenLink("https://discord.gg/fcqMjR7K4C")}
             className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#5865F2]/10 hover:bg-[#5865F2]/20 text-[12px] font-semibold text-[#5865F2] transition-colors border border-transparent dark:border-[#5865F2]/20"
           >
             <MessageCircle className="w-4 h-4" />

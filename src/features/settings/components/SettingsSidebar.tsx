@@ -1,7 +1,6 @@
 // src/features/settings/components/SettingsSidebar.tsx
 import { useState, useEffect } from "react";
 import {
-  Palette,
   Shield,
   HardDrive,
   Database,
@@ -12,7 +11,7 @@ import {
   PanelLeftOpen,
 } from "lucide-react";
 
-export type Tab = "appearance" | "security" | "storage" | "data" | "about";
+export type Tab = "security" | "storage" | "data" | "about";
 
 interface SettingsSidebarProps {
   activeTab: Tab;
@@ -21,7 +20,6 @@ interface SettingsSidebarProps {
 }
 
 const TABS = [
-  { id: "appearance", label: "Appearance", icon: Palette },
   { id: "security", label: "Security", icon: Shield },
   { id: "storage", label: "Storage", icon: HardDrive },
   { id: "data", label: "Data", icon: Database },
@@ -38,7 +36,7 @@ export default function SettingsSidebar({
   // Auto-collapse sidebar on small screens
   useEffect(() => {
     const handleResize = () => {
-      setIsCollapsed(window.innerWidth < 800);
+      setIsCollapsed(window.innerWidth <= 850);
     };
 
     // Set initial state
@@ -50,8 +48,8 @@ export default function SettingsSidebar({
 
   return (
     <div
-      className={`shrink-0 flex flex-col gap-6 md:gap-8 transition-all duration-300 ease-in-out ${
-        isCollapsed ? "w-16 md:w-20" : "w-56 md:w-64 lg:w-72"
+      className={`shrink-0 flex flex-col gap-8 transition-all duration-300 ease-in-out ${
+        isCollapsed ? "w-20" : "w-64"
       }`}
     >
       {/* Header (Back Button, Title & Toggle) */}
