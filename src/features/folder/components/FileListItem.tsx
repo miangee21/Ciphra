@@ -2,17 +2,11 @@
 import { useState, useRef, useEffect } from "react";
 import type { DecryptedFile, DecryptedDocument } from "../FolderPage";
 import type { Id } from "../../../../convex/_generated/dataModel";
+import { Star, Lock, MoreVertical, ChevronRight, FileText } from "lucide-react";
 import FullScreenViewer from "@/components/common/FullScreenViewer";
 import VerifyPinModal from "@/components/common/VerifyPinModal";
 import FileContextMenu from "./FileContextMenu";
-import {
-  Star,
-  Lock,
-  MoreVertical,
-  ChevronRight,
-  FileText,
-  Image as ImageIcon,
-} from "lucide-react";
+import ImageThumbnail from "./ImageThumbnail";
 
 interface FileListItemProps {
   item: DecryptedFile | DecryptedDocument;
@@ -119,35 +113,40 @@ export default function FileListItem({
 
         {/* ── Left Side: Icon & Info ── */}
         <div className="flex items-center gap-3.5 pl-2 overflow-hidden">
-          {/* Animated Icon Box */}
-          <div
-            className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl flex items-center justify-center shrink-0 transition-transform duration-500 group-hover:scale-105 group-hover:-rotate-6"
-            style={{
-              backgroundColor: itemColor + "15",
-              border: `1px solid ${itemColor}30`,
-            }}
-          >
-            {file?.type === "pdf" ? (
-              <span
-                className="text-[10px] font-black tracking-wider"
-                style={{ color: itemColor }}
-              >
-                PDF
-              </span>
-            ) : file?.type === "image" ? (
-              <ImageIcon
-                className="w-5 h-5 transition-colors duration-500"
-                style={{ color: itemColor }}
-                strokeWidth={1.5}
-              />
-            ) : (
-              <FileText
-                className="w-5 h-5 transition-colors duration-500"
-                style={{ color: itemColor }}
-                strokeWidth={1.5}
-              />
-            )}
-          </div>
+          {file?.type === "image" && file.storageId ? (
+            <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl overflow-hidden shrink-0 shadow-sm border border-slate-200 dark:border-slate-700/50">
+              <div className="w-full h-full transform transition-transform duration-500 group-hover:scale-110">
+                <ImageThumbnail
+                  storageId={file.storageId}
+                  name={file.name}
+                  isLocked={file.isLocked}
+                />
+              </div>
+            </div>
+          ) : (
+            <div
+              className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl flex items-center justify-center shrink-0 transition-transform duration-500 group-hover:scale-105 group-hover:-rotate-6"
+              style={{
+                backgroundColor: itemColor + "15",
+                border: `1px solid ${itemColor}30`,
+              }}
+            >
+              {file?.type === "pdf" ? (
+                <span
+                  className="text-[10px] font-black tracking-wider"
+                  style={{ color: itemColor }}
+                >
+                  PDF
+                </span>
+              ) : (
+                <FileText
+                  className="w-5 h-5 transition-colors duration-500"
+                  style={{ color: itemColor }}
+                  strokeWidth={1.5}
+                />
+              )}
+            </div>
+          )}
 
           {/* Name & Details */}
           <div className="flex flex-col truncate pr-2">
