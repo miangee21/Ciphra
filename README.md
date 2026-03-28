@@ -62,7 +62,7 @@ Choose the easiest installation method for your operating system. All manual dow
 The fastest way to install and keep Ciphra updated on Windows is through the Windows Package Manager. Open your terminal or command prompt and run:
 
 ```bash
-winget install ciphra
+winget install Ciphra.Ciphra
 ```
 
 **Direct Download:**
